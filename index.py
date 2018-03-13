@@ -15,33 +15,37 @@ def main():
 	data = json.loads(received)
 	# print(received)
 	
-	with open('output.csv', 'w', newline='', encoding='utf-8-sig') as f:
-		fieldnames = ['searchedWord', 'pronounciations', 'englishDefinition', 'partOfSpeech', 'tags', 'seeAlso', 'info']
-		writer = csv.DictWriter(f, fieldnames=fieldnames)
+	for book in data:
+			tempFilename = book["title"] + "(" + book["creators"] + ")" + ".csv"
+			print(tempFilename)
+			with open(tempFilename, 'w', newline='', encoding='utf-8-sig') as f:
+				fieldnames = ['searchedWord', 'pronounciations', 'englishDefinition', 'partOfSpeech', 'tags', 'seeAlso', 'info']
+				writer = csv.DictWriter(f, fieldnames=fieldnames)
+				writer.writeheader()
+				
+				for word in book["bookWords"]:
+					# print(word["searchedWord"])
+					counter = 0
+					entryCounter = 1
+					for entry in word["entries"]:
+							formatPronounciations = ', '.join("{!s}={!r}".format(k,v) for (k,v) in entry["pronounciations"].items())
 
-		writer.writeheader()
-		for word in data:
-			# print(word["searchedWord"])
-			counter = 0
-			entryCounter = 1
-			for entry in word["entries"]:
-					formatPronounciations = ', '.join("{!s}={!r}".format(k,v) for (k,v) in entry["pronounciations"].items())
+							etymologiesLength = len(entry["etymologies"])
+							# etymologies is a list of etymology objects
+							etymologies = entry["etymologies"]
+							if counter == 0:
+									# counter controls the searchedWord
+									writer.writerow({'searchedWord' : word["searchedWord"]})
+									# after writerow, goes to next row, so always a gap line?
+							else:
+									writer.writerow({'searchedWord' : ''})
 
-					etymologiesLength = len(entry["etymologies"])
-					# etymologies is a list of etymology objects
-					etymologies = entry["etymologies"]
-					if counter == 0:
-							# counter controls the searchedWord
-							writer.writerow({'searchedWord' : word["searchedWord"]})
-							# after writerow, goes to next row, so always a gap line?
-					else:
-							writer.writerow({'searchedWord' : ''})
-					writer.writerow({'searchedWord' : str(entryCounter), 'pronounciations': formatPronounciations, 'englishDefinition': ', '.join(etymologies[0]["englishDefinition"]), 'partOfSpeech': ', '.join(etymologies[0]["partOfSpeech"]), 'tags': ', '.join(etymologies[0]["tags"]), 'seeAlso': ', '.join(etymologies[0]["seeAlso"])})
-					for i in range(1, etymologiesLength, 1):
-							writer.writerow({'englishDefinition': ', '.join(etymologies[i]["englishDefinition"])})
-					
-					counter += 1
-					entryCounter += 1
+							writer.writerow({'searchedWord' : str(entryCounter), 'pronounciations': formatPronounciations, 'englishDefinition': ', '.join(etymologies[0]["englishDefinition"]), 'partOfSpeech': ', '.join(etymologies[0]["partOfSpeech"]), 'tags': ', '.join(etymologies[0]["tags"]), 'seeAlso': ', '.join(etymologies[0]["seeAlso"])})
+							for i in range(1, etymologiesLength, 1):
+									writer.writerow({'englishDefinition': ', '.join(etymologies[i]["englishDefinition"])})
+							
+							counter += 1
+							entryCounter += 1
 
 
 	return jsonify({'result' : 'success'})
