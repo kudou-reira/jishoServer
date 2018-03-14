@@ -1,6 +1,4 @@
 from flask import Flask, abort, request, jsonify
-from collections import namedtuple
-import helpers as hl
 import json, chardet
 import csv
 
@@ -17,7 +15,7 @@ def main():
 	
 	for book in data:
 			tempFilename = book["title"] + "(" + book["creators"] + ")" + ".csv"
-			print(tempFilename)
+			# print(tempFilename)
 			with open(tempFilename, 'w', newline='', encoding='utf-8-sig') as f:
 				fieldnames = ['searchedWord', 'pronounciations', 'englishDefinition', 'partOfSpeech', 'tags', 'seeAlso', 'info']
 				writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -49,6 +47,10 @@ def main():
 
 
 	return jsonify({'result' : 'success'})
+
+@app.route('/test')
+def index(): 
+	return "this is the test page"
 
 
 if __name__ == '__main__':
